@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-[1600px] mx-auto min-h-[calc(100vh-160px)] flex flex-col md:flex-row gap-8 py-6 px-4"
+    x-data="testState()">
+
+    <!-- Main Question Area (Left) -->
+    <div class="flex-grow space-y-6 order-2 md:order-1">
+        <!-- Question Content Card -->
+        <form id="test-form" method="POST" action="{% url 'submit_test' test.id %}" class="h-full flex flex-col">
+            {% csrf_token %}
+            <input type="hidden" name="time_taken" :value="durationSeconds - timeRemaining">
+
+            <div
+                class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 flex-grow flex flex-col overflow-hidden">
+                <!-- Question Header Bar -->
+                <div
+                    class="bg-gray-50 dark:bg-gray-900/50 px-10 py-5 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                    <span class="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">
+                        Question <span x-text="currentIndex + 1"></span>
+                    </span>
+                    <div class="flex space-x-3">
+                        <template x-if="questions[currentIndex].type === 'MCQ'">
+                            <span
+                                class="px-4 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-black uppercase">Multiple
+                                Choice</span>
+                        </template>
+                        <template x-if="questions[currentIndex].type !== 'MCQ'">
+                            <span
+                                class="px-4 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-black uppercase">Integer
+                                Type</span>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Question Body -->
+                <div class="p-10 flex-grow overflow-y-auto">
+                    {% for q in questions %}
+                    <div x-show="currentIndex === {{ forloop.counter0 }}" x-cloak>
+                        <div class="text-3xl font-black text-gray-900 dark:text-white leading-tight mb-12">
+                            {{ q.text }}
+                        </div>
+
+                        <!-- Input Options -->
+                        <div class="space-y-6">
+                            <!-- MCQ Options -->
+                            {% if q.type == 'MCQ' %}
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {% if q.option_a %}
+                                <label
+                                    class="relative flex items-center p-8 border-4 rounded-3xl cursor-pointer transition-all hover:scale-[1.02] active:scale-95 group shadow-sm"
+                                    :class="selectedAnswers[{{ q.id }}] === 'option_a' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800'">
+                                    <input type="radio" name="q_{{ q.id }}" value="option_a" class="hidden"
+                                        @change="selectedAnswers[{{ q.id }}] = 'option_a'">
+                                    <div class="w-12 h-12 flex items-center justify-center rounded-full border-4 mr-6 text-xl font-black transition-colors"
+                                        :class="selectedAnswers[{{ q.id }}] === 'option_a' ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-400'">
+                                        A
+                                    </div>
+                                    <span class="text-2xl font-black text-gray-900 dark:text-white">{{ q.option_a
+                                        }}</span>
+                                </label>
+                                {% endif %}
+                                {% if q.option_b %}
+                                <label
+                                    class="relative flex items-center p-8 border-4 rounded-3xl cursor-pointer transition-all hover:scale-[1.02] active:scale-95 group shadow-sm"
+                                    :class="selectedAnswers[{{ q.id }}] === 'option_b' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800'">
+                                    <input type="radio" name="q_{{ q.id }}" value="option_b" class="hidden"
+                                        @change="selectedAnswers[{{ q.id }}] = 'option_b'">
+                                    <div class="w-12 h-12 flex items-center justify-center rounded-full border-4 mr-6 text-xl font-black transition-colors"
+                                        :class="selectedAnswers[{{ q.id }}] === 'option_b' ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-400'">
+                                        B
+                                    </div>
+                                    <span class="text-2xl font-black text-gray-900 dark:text-white">{{ q.option_b
+                                        }}</span>
+                                </label>
+                                {% endif %}
+                                {% if q.option_c %}
+                                <label
+                                    class="relative flex items-center p-8 border-4 rounded-3xl cursor-pointer transition-all hover:scale-[1.02] active:scale-95 group shadow-sm"
+                                    :class="selectedAnswers[{{ q.id }}] === 'option_c' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800'">
+                                    <input type="radio" name="q_{{ q.id }}" value="option_c" class="hidden"
+                                        @change="selectedAnswers[{{ q.id }}] = 'option_c'">
+                                    <div class="w-12 h-12 flex items-center justify-center rounded-full border-4 mr-6 text-xl font-black transition-colors"
+                                        :class="selectedAnswers[{{ q.id }}] === 'option_c' ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-400'">
+                                        C
+                                    </div>
+                                    <span class="text-2xl font-black text-gray-900 dark:text-white">{{ q.option_c
+                                        }}</span>
+                                </label>
+                                {% endif %}
+                                {% if q.option_d %}
+                                <label
+                                    class="relative flex items-center p-8 border-4 rounded-3xl cursor-pointer transition-all hover:scale-[1.02] active:scale-95 group shadow-sm"
+                                    :class="selectedAnswers[{{ q.id }}] === 'option_d' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800'">
+                                    <input type="radio" name="q_{{ q.id }}" value="option_d" class="hidden"
+                                        @change="selectedAnswers[{{ q.id }}] = 'option_d'">
+                                    <div class="w-12 h-12 flex items-center justify-center rounded-full border-4 mr-6 text-xl font-black transition-colors"
+                                        :class="selectedAnswers[{{ q.id }}] === 'option_d' ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-400'">
+                                        D
+                                    </div>
+                                    <span class="text-2xl font-black text-gray-900 dark:text-white">{{ q.option_d
+                                        }}</span>
+                                </label>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="max-w-md">
+                                <label
+                                    class="block text-sm font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4">Your
+                                    Numeric Answer</label>
+                                <input type="text" name="q_{{ q.id }}"
+                                    style="color: black !important; background-color: white !important;"
+                                    class="w-full bg-white border-4 border-gray-200 rounded-3xl py-6 px-10 text-4xl font-mono font-black focus:ring-8 focus:ring-indigo-500/10 focus:border-indigo-600 transition-all outline-none"
+                                    placeholder="0" @input="selectedAnswers[{{ q.id }}] = $event.target.value">
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Action Footer -->
+                <div
+                    class="bg-gray-50 dark:bg-gray-900/50 px-10 py-8 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                    <div class="flex space-x-4">
+                        <button type="button" @click="prevQuestion()"
+                            class="px-10 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-black rounded-2xl shadow-xl border-4 border-gray-100 dark:border-gray-700 hover:bg-gray-100 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+                            :disabled="currentIndex === 0">
+                            PREVIOUS
+                        </button>
+                        <button type="button" @click="nextQuestion()"
+                            class="px-10 py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-2xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+                            :disabled="currentIndex === questions.length - 1">
+                            NEXT
+                        </button>
+                    </div>
+
+                    <button type="submit"
+                        class="px-12 py-4 bg-green-600 text-white font-black text-xl rounded-2xl shadow-2xl hover:bg-green-700 hover:scale-105 transition-all active:scale-95 uppercase tracking-widest">
+                        Submit Final Test
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sidebar & Timer (Right) -->
+    <div class="w-full md:w-[400px] space-y-6 order-1 md:order-2">
+        <!-- Sticky Timer Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 border-4 border-indigo-600 sticky top-24 z-50">
+            <h4 class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-3">Time
+                Remaining</h4>
+            <div class="flex items-center justify-between">
+                <span class="text-5xl font-mono font-black text-gray-900 dark:text-white leading-none"
+                    :class="timeRemaining < 300 ? 'text-red-600 animate-pulse' : ''"
+                    x-text="formatTime(timeRemaining)"></span>
+                <div
+                    class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/40 rounded-2xl flex items-center justify-center text-indigo-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question Navigation Grid -->
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 border border-gray-100 dark:border-gray-700">
+            <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-6">Question Palette</h4>
+            <div class="grid grid-cols-5 gap-3">
+                <template x-for="(q, index) in questions" :key="q.id">
+                    <button @click="currentIndex = index"
+                        class="w-full aspect-square rounded-xl font-black text-lg transition-all transform active:scale-90 border-2"
+                        :class="{
+                                'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-500/40': currentIndex === index,
+                                'bg-green-100 text-green-800 border-green-200': selectedAnswers[q.id] && currentIndex !== index,
+                                'bg-gray-50 text-gray-400 border-gray-100 dark:bg-gray-900 dark:border-gray-800': !selectedAnswers[q.id] && currentIndex !== index
+                            }" x-text="index + 1">
+                    </button>
+                </template>
+            </div>
+
+            <!-- Legend -->
+            <div class="mt-8 grid grid-cols-2 gap-4 text-[10px] font-black uppercase tracking-tighter">
+                <div class="flex items-center">
+                    <div class="w-3 h-3 bg-indigo-600 rounded-sm mr-2"></div> Current
+                </div>
+                <div class="flex items-center">
+                    <div class="w-3 h-3 bg-green-100 border border-green-200 rounded-sm mr-2"></div> Answered
+                </div>
+                <div class="flex items-center">
+                    <div class="w-3 h-3 bg-gray-50 border border-gray-100 rounded-sm mr-2"></div> Not Answered
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Question Data (Parsed by JS) -->
+    <script id="questions-data" type="application/json">
+        [
+            {% for q in questions %}
+            {
+                "id": {{ q.id }},
+                "text": "{{ q.text|escapejs }}",
+                "type": "{{ q.type }}",
+                "options": {
+                    {% if q.option_a %}"option_a": "{{ q.option_a|escapejs }}"{% if q.option_b %},{% endif %}{% endif %}
+                    {% if q.option_b %}"option_b": "{{ q.option_b|escapejs }}"{% if q.option_c %},{% endif %}{% endif %}
+                    {% if q.option_c %}"option_c": "{{ q.option_c|escapejs }}"{% if q.option_d %},{% endif %}{% endif %}
+                    {% if q.option_d %}"option_d": "{{ q.option_d|escapejs }}"{% endif %}
+                }
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+    </script>
+
+    <script>
+        function testState() {
+            return {
+                currentIndex: 0,
+                timeRemaining: Number("{{ test.duration_minutes|default:60 }}") * 60,
+                durationSeconds: Number("{{ test.duration_minutes|default:60 }}") * 60,
+                selectedAnswers: {},
+                questions: JSON.parse(document.getElementById('questions-data').textContent),
+
+    init() {
+        const timer = setInterval(() => {
+            if (this.timeRemaining > 0) {
+                this.timeRemaining--;
+            } else {
+                clearInterval(timer);
+                this.autoSubmit();
+            }
+        }, 1000);
+    },
+
+    formatTime(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        return `${h > 0 ? h + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    },
+
+    nextQuestion() {
+        if (this.currentIndex < this.questions.length - 1) {
+            this.currentIndex++;
+        }
+    },
+
+    prevQuestion() {
+        if (this.currentIndex > 0) {
+            this.currentIndex--;
+        }
+    },
+
+    autoSubmit() {
+        alert("Time is up! Submitting your test automatically.");
+        document.getElementById('test-form').submit();
+    }
+        }
+    }
+</script>
+
+<style>
+    [x-cloak] {
+        display: none !important;
+    }
+</style>
+{% endblock %}

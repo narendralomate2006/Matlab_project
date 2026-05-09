@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">Create a student account</h2>
+    <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+      Already have an account?
+      <a href="{% url 'login' %}" class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500">
+        Sign in here
+      </a>
+    </p>
+  </div>
+
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100 dark:border-gray-700">
+      <form class="space-y-6" action="{% url 'register' %}" method="POST">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+        <div class="rounded-md bg-red-50 dark:bg-red-900/20 p-4 mb-4">
+            <h3 class="text-sm font-medium text-red-800 dark:text-red-400">Please correct the errors below.</h3>
+            <ul class="mt-1 text-sm text-red-700 dark:text-red-300 list-disc list-inside">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% for field in form %}
+        <div>
+          <label for="{{ field.id_for_label }}" class="block text-sm font-bold text-white uppercase tracking-widest mb-2">{{ field.label }}</label>
+          <div class="mt-1">
+            <input id="{{ field.id_for_label }}" name="{{ field.html_name }}" 
+              type="{{ field.field.widget.input_type|default:'text' }}" 
+              style="color: black !important; background-color: white !important;"
+              class="w-full p-3 bg-white text-gray-900 border-2 border-indigo-500 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:outline-none">
+          </div>
+          {% if field.help_text %}
+          <p class="mt-2 text-xs text-gray-400 dark:text-gray-300">{{ field.help_text|safe }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+
+        <div>
+          <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all active:scale-95">
+            Register
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

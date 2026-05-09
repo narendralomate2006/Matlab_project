@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-white/20 dark:border-gray-700/30">
+    <div class="bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-600 px-8 py-10">
+        <h2 class="text-4xl font-black text-white text-center tracking-tight">Advanced Math Solver</h2>
+        <p class="mt-3 text-indigo-100 text-center text-lg opacity-90">Calculus & Functional Analysis Engine</p>
+    </div>
+
+    <div class="p-10">
+        <form method="post" class="space-y-8">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-1">
+                    <label for="problem_type" class="block text-sm font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest mb-2">Problem Type</label>
+                    <select id="problem_type" name="problem_type" class="w-full bg-gray-50 dark:bg-gray-700/50 border-0 rounded-xl py-4 px-4 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner">
+                        <option value="integral">Integral</option>
+                        <option value="beta">Beta Function</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label for="expression" class="block text-sm font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest mb-2">Mathematical Expression</label>
+                    <div class="relative">
+                        <!-- Symbol Bar -->
+                        <div class="absolute -top-10 right-0 flex space-x-1">
+                            <button type="button" onclick="insertSymbol('integrate()')" class="px-2 py-1 text-xs font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-t-lg border-t border-x border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 transition-colors">∫</button>
+                            <button type="button" onclick="insertSymbol('diff()')" class="px-2 py-1 text-xs font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-t-lg border-t border-x border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 transition-colors">∂</button>
+                            <button type="button" onclick="insertSymbol('oo')" class="px-2 py-1 text-xs font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-t-lg border-t border-x border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 transition-colors">∞</button>
+                            <button type="button" onclick="insertSymbol('pi')" class="px-2 py-1 text-xs font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-t-lg border-t border-x border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 transition-colors">π</button>
+                            <button type="button" onclick="insertSymbol('sqrt()')" class="px-2 py-1 text-xs font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-t-lg border-t border-x border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 transition-colors">√</button>
+                        </div>
+                        <input type="text" name="expression" id="expression" class="w-full bg-gray-50 dark:bg-gray-700/50 border-0 rounded-xl py-4 px-4 text-xl font-mono text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner" placeholder="e.g. x**2 or 5, 2" required>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xl py-5 rounded-2xl shadow-xl hover:shadow-indigo-500/20 transform hover:-translate-y-1 active:scale-95 transition-all">
+                SOLVE NOW
+            </button>
+        </form>
+
+        {% if result_data %}
+        <div id="solution-section" class="mt-12 space-y-8 opacity-0 transform translate-y-8 transition-all duration-1000 ease-out">
+            <div class="flex items-center space-x-4 mb-6">
+                <div class="h-px bg-gray-200 dark:bg-gray-700 flex-grow"></div>
+                <h3 class="text-2xl font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Result</h3>
+                <div class="h-px bg-gray-200 dark:bg-gray-700 flex-grow"></div>
+            </div>
+            
+            {% if not result_data.success %}
+                <div class="bg-red-500/10 backdrop-blur-md border border-red-500/20 p-6 rounded-2xl">
+                    <p class="text-red-600 dark:text-red-400 font-bold">Error: {{ result_data.error }}</p>
+                </div>
+            {% else %}
+                <!-- Glassmorphism Steps Card -->
+                <div class="bg-white/40 dark:bg-gray-700/20 backdrop-blur-xl border border-white/20 dark:border-gray-600/20 p-8 rounded-3xl shadow-xl">
+                    <h4 class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-6">Solution Path</h4>
+                    <div class="overflow-x-auto text-xl dark:text-gray-100 py-4 leading-relaxed">
+                        \[ {{ result_data.steps }} \]
+                    </div>
+                </div>
+                
+                <!-- Final Answer Glass Card -->
+                <div class="relative group bg-indigo-600/5 dark:bg-indigo-400/5 backdrop-blur-2xl border border-indigo-500/20 rounded-3xl p-10 shadow-2xl overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-indigo-600"></div>
+                    <div class="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                        <button onclick="copyLaTeX('{{ result_data.result|escapejs }}')" class="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg hover:bg-indigo-700">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                            <span>COPY LATEX</span>
+                        </button>
+                    </div>
+                    <h4 class="text-sm font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-4">Final Output</h4>
+                    <div class="overflow-x-auto">
+                        <p class="text-3xl font-black text-gray-900 dark:text-white text-center">
+                            \[ {{ result_data.result }} \]
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function insertSymbol(sym) {
+        const input = document.getElementById('expression');
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        const text = input.value;
+        input.value = text.substring(0, start) + sym + text.substring(end);
+        input.focus();
+        if (sym.includes('()')) {
+            input.setSelectionRange(start + sym.length - 1, start + sym.length - 1);
+        } else {
+            input.setSelectionRange(start + sym.length, start + sym.length);
+        }
+    }
+
+    function copyLaTeX(latex) {
+        navigator.clipboard.writeText(latex);
+        const btn = event.currentTarget;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span>COPIED!</span>';
+        setTimeout(() => { btn.innerHTML = originalText; }, 2000);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const solution = document.getElementById('solution-section');
+        if (solution) {
+            setTimeout(() => {
+                solution.classList.remove('opacity-0', 'translate-y-8');
+                solution.classList.add('opacity-100', 'translate-y-0');
+            }, 100);
+        }
+    });
+</script>
+{% endblock %}

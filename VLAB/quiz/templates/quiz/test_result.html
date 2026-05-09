@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-10 py-10 px-4">
+    <!-- Header Section: Scorecard -->
+    <div class="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 rounded-3xl shadow-2xl p-10 text-white">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+        <div class="relative z-10 flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0">
+            <div class="text-center md:text-left">
+                <h2 class="text-sm font-bold uppercase tracking-widest opacity-80 mb-2">Performance Report</h2>
+                <h1 class="text-5xl font-black mb-4">{{ attempt.test.title }}</h1>
+                <p class="text-indigo-100 max-w-md">Detailed analysis of your recent test attempt. Review your mistakes and master the concepts.</p>
+            </div>
+            
+            <div class="flex items-center space-x-10">
+                <div class="text-center">
+                    <div class="relative inline-flex items-center justify-center">
+                        <svg class="w-32 h-32 transform -rotate-90">
+                            <circle class="text-white/20" stroke-width="8" stroke="currentColor" fill="transparent" r="56" cx="64" cy="64"/>
+                            <circle class="text-white" stroke-width="8" stroke-dasharray="351.85" stroke-dashoffset="{{ 351.85|add:percentage|add:'-351.85'|default:0 }}" stroke-linecap="round" stroke="currentColor" fill="transparent" r="56" cx="64" cy="64"/>
+                        </svg>
+                        <span class="absolute text-3xl font-black">{{ percentage }}%</span>
+                    </div>
+                    <p class="mt-2 text-xs font-bold uppercase tracking-widest">Accuracy</p>
+                </div>
+                
+                <div class="text-center">
+                    <span class="block text-5xl font-black">{{ attempt.score|floatformat:0 }}<span class="text-2xl opacity-60">/{{ total_questions }}</span></span>
+                    <p class="mt-2 text-xs font-bold uppercase tracking-widest">Total Score</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Time Analysis -->
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 border border-gray-100 dark:border-gray-700">
+            <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/40 rounded-2xl flex items-center justify-center mb-6">
+                <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">Time Analysis</h3>
+            <p class="text-3xl font-black text-gray-900 dark:text-white">{{ avg_time }}s</p>
+            <p class="text-xs text-gray-400 mt-1">Average time per question</p>
+        </div>
+
+        <!-- Topic Mastery & Action Items -->
+        <div class="md:col-span-2 bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900/40 rounded-2xl flex items-center justify-center">
+                        <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    </div>
+                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-widest">Topic Insights</h3>
+                </div>
+                <a href="/dashboard/" class="text-xs font-bold text-indigo-600 hover:underline">View Growth Graph →</a>
+            </div>
+            
+            <div class="space-y-4">
+                {% if subjects_to_practice %}
+                    <p class="text-gray-600 dark:text-gray-400 font-medium">Based on your errors, you should focus on:</p>
+                    <div class="flex flex-wrap gap-3">
+                        {% for sub in subjects_to_practice %}
+                        <span class="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-xl text-sm font-bold border border-red-100 dark:border-red-800">
+                            Action Item: Practice more {{ sub }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-green-600 font-bold">Perfect Score! You have mastered all topics in this test.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Solutions -->
+    <div class="space-y-8">
+        <div class="flex items-center space-x-4">
+            <div class="h-px bg-gray-200 dark:bg-gray-700 flex-grow"></div>
+            <h2 class="text-2xl font-black text-gray-400 uppercase tracking-widest">Detailed Solutions</h2>
+            <div class="h-px bg-gray-200 dark:bg-gray-700 flex-grow"></div>
+        </div>
+
+        {% for report in question_reports %}
+        <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700 transition-all hover:shadow-2xl">
+            <div class="bg-gray-50 dark:bg-gray-900/50 px-8 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest">Question {{ forloop.counter }}</span>
+                {% if report.is_correct %}
+                <span class="px-3 py-1 bg-green-500 text-white rounded-full text-[10px] font-black">CORRECT</span>
+                {% else %}
+                <span class="px-3 py-1 bg-red-500 text-white rounded-full text-[10px] font-black">INCORRECT</span>
+                {% endif %}
+            </div>
+            <div class="p-8 space-y-6">
+                <div class="text-xl font-bold text-black dark:text-white leading-relaxed">
+                    {{ report.question.text }}
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-6 border border-gray-100 dark:border-gray-700">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Your Answer</h4>
+                        <span class="text-2xl font-black {% if report.is_correct %}text-green-500{% else %}text-red-500{% endif %}">{{ report.user_answer }}</span>
+                    </div>
+                    <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl p-6 border border-indigo-100 dark:border-indigo-800">
+                        <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-2">Correct Answer</h4>
+                        <span class="text-2xl font-black text-indigo-700 dark:text-indigo-300">{{ report.question.correct_answer }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-20 bg-gray-50 dark:bg-gray-900/30 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+            <p class="text-gray-500 dark:text-gray-400 italic">No questions found.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

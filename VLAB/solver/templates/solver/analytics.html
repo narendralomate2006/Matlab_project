@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Your Learning Analytics</h2>
+        <p class="mt-2 text-sm text-gray-600">Track your progress and mastery over the last week.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Chart Section -->
+        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+            <h3 class="text-lg font-bold text-gray-900 mb-6 border-b pb-2">Problems Solved (Last 7 Days)</h3>
+            <div class="h-64 relative">
+                <canvas id="studentChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Topic Mastery Section -->
+        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+            <h3 class="text-lg font-bold text-gray-900 mb-6 border-b pb-2">Topic Mastery</h3>
+            <div class="space-y-8 mt-6">
+                {% for item in mastery %}
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-semibold text-gray-700">{{ item.category }}</span>
+                        <span class="text-sm font-bold text-indigo-600">{{ item.percentage }}%</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-3">
+                        <div class="bg-indigo-600 h-3 rounded-full transition-all duration-500" style="width: {{ item.percentage }}%"></div>
+                    </div>
+                    <div class="mt-2 flex justify-between text-xs text-gray-400">
+                        <span>Accuracy</span>
+                        <span>{{ item.correct }} of {{ item.total }} solved</span>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-center text-gray-500 italic py-10">Start solving to see your mastery!</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('studentChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels|safe }},
+                datasets: [{
+                    label: 'Successful Solves',
+                    data: {{ chart_data|safe }},
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    borderWidth: 4,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#4f46e5',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#1f2937',
+                        padding: 12,
+                        titleFont: { size: 14 },
+                        bodyFont: { size: 14 }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            color: '#9ca3af'
+                        },
+                        grid: {
+                            color: '#f3f4f6'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#9ca3af'
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="mb-12">
+        <h2 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight">Available Mock Tests</h2>
+        <p class="mt-2 text-lg text-gray-600 dark:text-gray-400">Select a test to challenge your skills and get detailed analysis.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for test in tests %}
+        <div class="group bg-white dark:bg-gray-800 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col">
+            <div class="h-2 bg-indigo-600"></div>
+            <div class="p-8 flex-grow">
+                <div class="flex justify-between items-start mb-6">
+                    <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/40 rounded-2xl flex items-center justify-center">
+                        <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    </div>
+                    <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-bold uppercase">
+                        {{ test.questions.count }} Questions
+                    </span>
+                </div>
+                
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 transition-colors">{{ test.title }}</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mb-6 leading-relaxed">
+                    JEE/CET Style assessment covering various mathematical concepts.
+                </p>
+                
+                <div class="flex items-center space-x-4 text-sm font-semibold text-gray-600 dark:text-gray-400">
+                    <div class="flex items-center">
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        {{ test.duration_minutes }} Min
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-8 pb-8">
+                <a href="{% url 'test_window' test.id %}" class="w-full inline-flex justify-center items-center px-6 py-4 border border-transparent text-base font-black rounded-2xl text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all active:scale-95">
+                    START TEST
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full py-20 text-center bg-gray-50 dark:bg-gray-900/30 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
+            <h3 class="mt-4 text-lg font-bold text-gray-900 dark:text-white">No tests available</h3>
+            <p class="mt-1 text-sm text-gray-500">Check back later or ask an admin to add questions.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
